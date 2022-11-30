@@ -1,5 +1,4 @@
 import Dexie from "dexie";
-import { Transaction, BlockTableData, Block } from "../interfaces";
 import { IDB_TX_CACHE, IDB_BLOCKS_CACHE } from "../constants";
 
 export class BrowserCache extends Dexie {

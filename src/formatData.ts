@@ -19,10 +19,8 @@ export const formatToBlockInfo = (data: any): BlockInfo => {
 
 export const formatNumber = (num: string | number): string => {
   let target = "";
-  if (num) {
-    if (typeof num === "number") target = num.toString();
+  if (typeof num === "number") target = num.toString();
     else target = num;
-  }
   return target.replace(/\B(?=(\d{3})+(?!\d))/g, "'");
 };
 
