@@ -1,8 +1,8 @@
 import axios from "axios";
 import { action, makeAutoObservable, observable } from "mobx";
 import { Network } from "interfaces";
-// import { HOST_PROTOCOL, HOST_NAME, HOST_PORT } from "../constants_local";
-import { HOST_PROTOCOL, HOST_NAME, HOST_PORT, IDB_TX_CACHE, IDB_BLOCKS_CACHE } from "../constants";
+// import { HOST_PROTOCOL, HOST_NAME } from "../constants_local";
+import { HOST_PROTOCOL, HOST_NAME, IDB_TX_CACHE, IDB_BLOCKS_CACHE } from "../constants";
 import { NETWORKS } from "networks";
 import { BrowserCache } from "./BrowserCache";
 import {
@@ -71,7 +71,7 @@ class Store {
   @action
   async fetchLatestBlock() {
     await axios
-      .post(`${HOST_PROTOCOL}://${HOST_NAME}:${HOST_PORT}/api/latestBlock`, {
+      .post(`${HOST_PROTOCOL}://${HOST_NAME}/api/latestBlock`, {
         network: this.network,
       })
       .then(async (response) => {
@@ -119,7 +119,7 @@ class Store {
     // We need to fetch it
     if (mustFetch) {
       bItemData = await axios
-        .post(`${HOST_PROTOCOL}://${HOST_NAME}:${HOST_PORT}/api/blockchainItem`, {
+        .post(`${HOST_PROTOCOL}://${HOST_NAME}/api/blockchainItem`, {
           hash,
           network: this.network,
         })
@@ -167,7 +167,7 @@ class Store {
 
     if (remainingIds.length) {
       let data = await axios
-        .post(`${HOST_PROTOCOL}://${HOST_NAME}:${HOST_PORT}/api/blockRange`, {
+        .post(`${HOST_PROTOCOL}://${HOST_NAME}/api/blockRange`, {
           nums: remainingIds,
           network: this.network,
         })
@@ -201,7 +201,7 @@ class Store {
 
     if (!blocks.length) {
       data = await axios
-        .post(`${HOST_PROTOCOL}://${HOST_NAME}:${HOST_PORT}/api/blockRange`, {
+        .post(`${HOST_PROTOCOL}://${HOST_NAME}/api/blockRange`, {
           nums: [num],
           network: this.network,
         })
@@ -312,7 +312,7 @@ class Store {
   ): Promise<{ bNum: number; tx: string } | null> {
     let txsIdRange = await axios
       .get(
-        `${HOST_PROTOCOL}://${HOST_NAME}:${HOST_PORT}/${this.network.name.split(" ")[0].toLowerCase() + FILENAME
+        `${HOST_PROTOCOL}://${HOST_NAME}/${this.network.name.split(" ")[0].toLowerCase() + FILENAME
         }.json`
       )
       .then((response) => {
