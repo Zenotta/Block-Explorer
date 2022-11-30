@@ -4,7 +4,7 @@ const { extractTxs } = require('./getTransactions');
 
 // Semaphore
 const throttler = new Semaphore(1); // Semaphore to limit the number of concurrent requests to 1
-let latestBlock = 0;
+let lastSeenBlock = 0;
 
 /** Fetches the latest block */
 async function latestBlock(req, res, fullConfig) {
@@ -14,7 +14,7 @@ async function latestBlock(req, res, fullConfig) {
     await calls.fetchLatestBlock(storagePath).then(lb => {
         try {
             throttler.callFunction(extractTxs, lb.content.block.header.b_num, network, fullConfig).then(res => console.log(res)).catch(err => console.log(err));
-            latestBlock = lb.content.block.header.b_num;
+            lastSeenBlock = lb.content.block.header.b_num;
         } catch (error) {
             console.log('Failed to retrieve latest block: ', error);
         }
@@ -64,14 +64,14 @@ async function blockRange(req, res, fullConfig, bNumCache, blocksCache) {
     let unknowns = [];
     let knowns = [];
 
-    latestBlock = await calls.fetchLatestBlock(storagePathLatest).then(lBlock => {
+    lastSeenBlock = await calls.fetchLatestBlock(storagePathLatest).then(lBlock => {
         return lBlock.content.block.header.b_num;
     }).catch(error => {
         res.status(500).send(error)
     });
 
     for (let n of nums) {
-        if (n <= latestBlock && n >= 0) {
+        if (n <= lastSeenBlock && n >= 0) {
             let posEntry = bNumCache.get(n);
     
             if (posEntry) {

@@ -27,9 +27,6 @@ app.use(express.urlencoded({
 }));
 app.use(compression());
 
-// Latest block
-let latestBlock = 0;
-
 // Caches
 const blocksCache = new DragonflyCache();
 const txsCache = new DragonflyCache();

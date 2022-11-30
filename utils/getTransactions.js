@@ -39,7 +39,6 @@ async function extractLatestTxs(latestBlockNum, network, config) {
                         i += BATCH_SIZE + 1; // Increment i by batch size
                         writeToJsonFile(filePrefix + FILENAME, jsonFile);
                     } else {
-                        err = 'Error while fetching block range';
                         break;
                     }
                 }
@@ -67,6 +66,7 @@ async function fetchBlockRange(startBlock, endBlock, network, config) {
             return res.data
         })
         .catch(err => {
+            console.log("Error while fetching block range", err);
             return null
         });
 }
