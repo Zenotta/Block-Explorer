@@ -26,8 +26,6 @@ async function extractLatestTxs(latestBlockNum, network, config) {
                     const endBlock = i + BATCH_SIZE <= latestBlockNum ? i + BATCH_SIZE : latestBlockNum;
                     const startBlock = i;
 
-                    console.log(startBlock, endBlock)
-
                     let blockRange = await fetchBlockRange(startBlock, endBlock, network, config);
                     if (blockRange) {
                         for (const d of blockRange) {

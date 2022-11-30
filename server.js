@@ -4,11 +4,9 @@ const https = require('https');
 const path = require('path');
 const cors = require('cors');
 const compression = require('compression');
-const calls = require('./utils/calls');
 const config = require('./utils/config');
+const routes = require('./utils/routes');
 const DragonflyCache = require('dragonfly-cache').DragonflyCache;
-const Semaphore = require('./utils/semaphore').Semaphore;
-const { extractTxs } = require('./utils/getTransactions');
 
 // Server setup
 const app = express();
@@ -37,107 +35,16 @@ const blocksCache = new DragonflyCache();
 const txsCache = new DragonflyCache();
 const bNumCache = new DragonflyCache();
 
-// Semaphore
-const throttler = new Semaphore(1); // Semaphore to limit the number of concurrent requests to 1
-
 /** Fetch latest block */
-app.post('/api/latestBlock', (req, res) => {
-    const network = req.body.network;
-    const storagePath = `${fullConfig.PROTOCOL}://${network.sIp}:${network.sPort}/latest_block`;
-
-    calls.fetchLatestBlock(storagePath).then(lb => {
-        try {
-            throttler.callFunction(extractTxs, lb.content.block.header.b_num, network, fullConfig).then(res => console.log(res)).catch(err => console.log(err));
-            latestBlock = lb.content.block.header.b_num;
-        } catch (error) {
-            console.log('Failed to retrieve latest block: ', error);
-        }
-        res.json(lb);
-    }).catch(error => {
-        res.status(500).send(error);
-    });
-});
+app.post('/api/latestBlock', (req, res) => routes.latestBlock(req, res, fullConfig));
 
 /** Fetch blockchain item */
-app.post('/api/blockchainItem', (req, res) => {
-    const network = req.body.network;
-    const hash = req.body.hash;
-    const storagePath = `${fullConfig.PROTOCOL}://${network.sIp}:${network.sPort}/blockchain_entry`;
-    const genesisTxRegex = /0{5}[0-9]/;
-    const isBlock = hash[0] !== 'g' && !hash.match(genesisTxRegex);
-
-    let posEntry = null;
-
-    if (isBlock)
-        posEntry = blocksCache.get(hash);
-    else  // Transaction
-        posEntry = txsCache.get(hash);
-
-
-    if (!posEntry) {
-        calls.fetchBlockchainItem(storagePath, hash).then(bItem => {
-            if (bItem.content.hasOwnProperty('Block')) {
-                blocksCache.add(hash, bItem.content);
-            } else if (bItem.content.hasOwnProperty('Transaction')) {
-                txsCache.add(hash, bItem.content);
-            }
-            res.json(bItem.content);
-        }).catch(error => {
-            res.status(500).send(error);
-        });
-    } else { // Serving from cache
-        res.json(posEntry);
-    }
-});
+app.post('/api/blockchainItem', (req, res) => routes.blockchainItem(req, res, txsCache, blocksCache));
 
 /** Fetch block range */
-app.post('/api/blockRange', async (req, res) => {
-    const network = req.body.network;
-    const storagePath = `${fullConfig.PROTOCOL}://${network.sIp}:${network.sPort}/block_by_num`;
-    const storagePathLatest = `${fullConfig.PROTOCOL}://${network.sIp}:${network.sPort}/latest_block`;
-    let nums = Array.isArray(req.body.nums) ? req.body.nums.filter(num => Number.isFinite(num)) : [];
-    let unknowns = [];
-    let knowns = [];
+app.post('/api/blockRange', (req, res) => routes.blockRange(req, res, bNumCache, blocksCache));
 
-    latestBlock = await calls.fetchLatestBlock(storagePathLatest).then(lBlock => {
-        return lBlock.content.block.header.b_num;
-    }).catch(error => {
-        res.status(500).send(error)
-    });
-
-    for (let n of nums) {
-        if (n <= latestBlock && n >= 0) {
-            let posEntry = bNumCache.get(n);
-    
-            if (posEntry) {
-                knowns.push(posEntry);
-            } else {
-                unknowns.push(n);
-            }
-        }
-    }
-
-    if (unknowns.length) {
-        calls.fetchBlockRange(storagePath, unknowns).then(response => {
-            if (response.status == 'Success' && response.content.length) {
-                for (let b of response.content) {
-                    bNumCache.add(b[1].block.header.b_num, b);
-                    // Add to blocksCache too coz why not
-                    if (!blocksCache.get(b[0])) {
-                        blocksCache.add(b[0], { "Block": b[1] });
-                    }
-                    knowns.push(b);
-                }
-                res.json(knowns);
-            }
-        }).catch(error => {
-            res.status(500).send(error);
-        });
-    } else {
-        res.json(knowns);
-    }
-});
-
+/** Use static */
 app.use(express.static('./public'));
 
 // Let react-router handle routing
