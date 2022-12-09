@@ -1,12 +1,16 @@
+// ! \\ Unfinished component
+// Must wait for db to be updated with transactions handling before completing this component
+
+
 import * as React from 'react';
 import { useObserver } from 'mobx-react';
 import { Button } from 'chi-ui';
 import { StoreContext } from '../../index';
-import styles from './CsvBlockExport.scss';
+import styles from './CsvTxExport.scss';
 
 const DEFAULT_WARNING = 'Please enter range of transactions to export';
 
-export const CsvBlockExport = () => {
+export const CsvTxExport = () => {
   const store = React.useContext(StoreContext);
   const [startingTx, setStartingTx] = React.useState<number>(0);
   const [endingTx, setEndingTx] = React.useState<number>(9);
@@ -18,21 +22,20 @@ export const CsvBlockExport = () => {
   const valueCheck = async (start: number, end: number) => {
     setDisabled(true);
     if (start >= end) {
-      setWarningMsg('Starting transaction must be less than ending transaction');
+      setWarningMsg('Starting transaction number must be less than ending transaction');
     } else {
-      const sBlock = await store.blockNumIsValid(start); // Add timeouts
-      const eBlock = await store.blockNumIsValid(end);
+      // const sBlock = await store.blockNumIsValid(start); // Add timeouts
+      // const eBlock = await store.blockNumIsValid(end);
 
-      if (!sBlock.isValid) {
-        setWarningMsg(sBlock.error);
-      } else if (!eBlock.isValid) {
-        setWarningMsg(eBlock.error);
-      } else {
-        setTxRange(`Number of selected transactions : ${(end - start) + 1}`)
-        setDisabled(false);
-        setWarningMsg('');
-
-      }
+      // if (!sBlock.isValid) {
+      //   setWarningMsg(sBlock.error);
+      // } else if (!eBlock.isValid) {
+      //   setWarningMsg(eBlock.error);
+      // } else {
+      //   setTxRange(`Number of selected transactions : ${(end - start) + 1}`)
+      //   setDisabled(false);
+      //   setWarningMsg('');
+      // }
     }
   };
 
@@ -65,14 +68,14 @@ export const CsvBlockExport = () => {
       setWarningMsg(DEFAULT_WARNING);
     }
 
-    if (!store.latestBlock) {
-      store.fetchLatestBlock().then(() => {
-        if (store.latestBlock) {
-          setStartingTx(store.latestBlock.bNum >= 9 ? store.latestBlock.bNum - 9 : 9)
-          setEndingTx(store.latestBlock.bNum)
-        }
-      });
-    }
+    // if (!store.latestBlock) {
+    //   store.fetchLatestBlock().then(() => {
+    //     if (store.latestBlock) {
+    //       setStartingTx(store.latestBlock.bNum >= 9 ? store.latestBlock.bNum - 9 : 9)
+    //       setEndingTx(store.latestBlock.bNum)
+    //     }
+    //   });
+    // }
   }, [startingTx, endingTx]);
 
   return useObserver(() => (
@@ -111,7 +114,7 @@ export const CsvBlockExport = () => {
           onClick={() => {
             downloadTxRange();
           }}
-          disabled={disabled}
+          disabled={true}
           loading={loading}
         >
           Download CSV

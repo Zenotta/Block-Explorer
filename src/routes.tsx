@@ -4,6 +4,7 @@ import { TxsExplorer } from 'components/TxsExplorer/TxsExplorer';
 import { BlockView } from 'components/BlockView/BlockView';
 import { TxView } from 'components/TxView/TxView';
 import { CsvBlockExport } from 'components/CsvBlockExport/CsvBlockExport';
+import { CsvTxExport } from 'components/CsvTxExport/CsvTxExport';
 import { Overview } from 'components/Overview/Overview';
 
 /**
@@ -52,7 +53,7 @@ export const routes: MainRoutes[] = [
   {
     path: '/csv-tx-export',
     name: 'CSV Transaction export',
-    Component: CsvBlockExport,
+    Component: CsvTxExport,
     hidden: true
   }
 ];

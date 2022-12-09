@@ -3,6 +3,7 @@ import { useObserver } from 'mobx-react';
 import { Button } from 'chi-ui';
 import { StoreContext } from '../../index';
 import styles from './CsvBlockExport.scss';
+import { blockRangeToCsv, downloadFile } from '../../formatCsv';
 
 const DEFAULT_WARNING = 'Please enter range of blocks to export';
 
@@ -37,23 +38,23 @@ export const CsvBlockExport = () => {
   };
 
   const downloadBlockRange = async () => {
-    // if (!disabled && startingBlock >= 0 && endingBlock) {
-    //   setLoading(true);
-    //   store
-    //     .fetchBlockRange(startingBlock, endingBlock)
-    //     .then((blockRange: any) => {
-    //       if (blockRange.length > 0) {
-    //         let csv = blockRangeToCsv(blockRange);
-    //         downloadFile('block_range.csv', csv);
-    //         setWarningMsg('');
-    //       }
-    //     })
-    //     .catch((err: any) => {
-    //       setWarningMsg('Range is to big, please reduce range size');
-    //       console.log(err.message);
-    //     });
-    //   setLoading(false);
-    // }
+    if (!disabled && startingBlock >= 0 && endingBlock) {
+      setLoading(true);
+      store
+        .fetchBlockRange(startingBlock, endingBlock)
+        .then((blockRange: any) => {
+          if (blockRange.length > 0) {
+            let csv = blockRangeToCsv(blockRange);
+            downloadFile(`block_range_${startingBlock}_${endingBlock}.csv`, csv);
+            setWarningMsg('');
+          }
+        })
+        .catch((err: any) => {
+          setWarningMsg('Range is to big, please reduce range size');
+          console.log(err.message);
+        });
+      setLoading(false);
+    }
   };
 
   React.useEffect(() => {
@@ -119,26 +120,3 @@ export const CsvBlockExport = () => {
     </div>
   ));
 };
-
-
-{/* <TextInput
-            className={styles.txtInput}
-            type="number"
-            value={startingBlock}
-            placeholder="Start Block Number"
-            onChange={(e: { target: { value: string } }) => {
-              const val = e.target.value;
-              setStartingBlock(val ? parseInt(val) : 1);
-            }}
-          /> */}
-
-{/* <TextInput
-            className={styles.txtInput}
-            type="number"
-            value={endingBlock}
-            placeholder="End Block Number"
-            onChange={(e: { target: { value: string } }) => {
-              const val = e.target.value;
-              setEndingBlock(val ? parseInt(val) : 2);
-            }}
-          /> */}

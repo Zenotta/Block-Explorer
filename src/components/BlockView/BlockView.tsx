@@ -244,7 +244,7 @@ export const BlockView = () => {
 
                         {showTransactions && (
                             <>
-                                <CsvBtn action={() => downloadTxs()} />
+                                {/* <CsvBtn action={() => downloadTxs()} /> */}
                                 <div className={styles.transactionContainer}>
                                     {transactions.map((t: TransactionInfoProps, i: number) => {
                                         return (
@@ -267,7 +267,7 @@ export const BlockView = () => {
                         <h2 className={styles.innerHeading}>
                             {'Coinbase Transaction'}
                         </h2>
-                        <CsvBtn action={() => downloadCbTx()} />
+                        {/* <CsvBtn action={() => downloadCbTx()} /> */}
                         <div className={styles.transactionContainer}>
                             <Card rows={formatMiningTxDataForTable(miningTx)} />
                         </div>
